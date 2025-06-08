@@ -1,21 +1,21 @@
-const API_BASE = "http://localhost:5000/api/workouts";
+const API = "http://localhost:5000/api";
 
-export async function fetchWorkouts() {
-  const res = await fetch(API_BASE);
-  return res.json();
-}
+export const getSessions = () =>
+  fetch(`${API}/sessions`).then(r => r.json());
 
-export async function addWorkout(workout) {
-  const res = await fetch(API_BASE, {
+export const createSession = (payload) =>
+  fetch(`${API}/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(workout),
-  });
-  return res.json();
-}
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
 
-export async function deleteWorkout(id) {
-  return fetch(`${API_BASE}/${id}`, {
-    method: "DELETE",
-  });
-}
+export const addExercise = (sessionId, exercise) =>
+  fetch(`${API}/sessions/${sessionId}/exercises`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(exercise)
+  }).then(r => r.json());
+
+export const deleteSession = (id) =>
+  fetch(`${API}/sessions/${id}`, { method: "DELETE" });
