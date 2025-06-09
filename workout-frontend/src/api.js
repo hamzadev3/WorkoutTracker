@@ -19,3 +19,8 @@ export const addExercise = (sessionId, exercise) =>
 
 export const deleteSession = (id) =>
   fetch(`${API}/sessions/${id}`, { method: "DELETE" });
+
+export const deleteExercise = (sid, idx) =>
+  fetch(`${API}/sessions/${sid}/exercises/${idx}`, { method: "DELETE" })
+    .then(r => r.json());
+

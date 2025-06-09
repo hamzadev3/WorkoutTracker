@@ -37,11 +37,35 @@ router.post("/:id/exercises", async (req, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+/* DELETE /api/sessions/:id/exercises/:idx  ─ remove one exercise by array index */
+router.delete("/:id/exercises/:idx", async (req, res) => {
+  const { id, idx } = req.params;        // <- keep names consistent
+  try {
+    const session = await Session.findById(id);
+    if (!session) return res.status(404).end();
 
-/* DELETE /api/sessions/:id */
-router.delete("/:id", async (req, res) => {
-  await Session.findByIdAndDelete(req.params.id);
-  res.status(204).end();
+    session.exercises.splice(Number(idx), 1);
+    await session.save();
+    res.json(session);                    // send the updated session
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
+
+/* DELETE /api/sessions/:sid/exercises/:idx   (idx = array index) */
+router.delete("/:sid/exercises/:idx", async (req, res) => {
+  const { sid, idx } = req.params;
+  try {
+    const session = await Session.findById(sid);
+    if (!session) return res.status(404).end();
+
+    session.exercises.splice(idx, 1);
+    await session.save();
+    res.json(session);          // send updated session back
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 
 module.exports = router;

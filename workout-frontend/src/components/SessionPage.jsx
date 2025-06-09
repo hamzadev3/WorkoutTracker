@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { addExercise } from "../api";
+import { addExercise, deleteExercise } from "../api";
+
 
 export default function SessionPage({ session, onUpdate, onClose }) {
   const [title, setTitle] = useState("");
@@ -31,15 +32,25 @@ export default function SessionPage({ session, onUpdate, onClose }) {
         </form>
 
         <ul className="space-y-2">
-          {session.exercises.map((ex, i) => (
-            <li key={i} className="rounded bg-slate-700/60 px-3 py-2 text-sm flex justify-between">
-              <span>{ex.title}</span>
-              <span className="text-slate-300">
-                {ex.sets}×{ex.reps} @ {ex.weight} lbs
-              </span>
-            </li>
-          ))}
-        </ul>
+  {session.exercises.map((ex, i) => (
+    <li key={i} className="rounded bg-slate-700/60 px-3 py-2 text-sm flex justify-between">
+      <span>{ex.title}</span>
+      <span className="flex items-center gap-3 text-slate-300">
+        {ex.sets}×{ex.reps} @ {ex.weight} lbs
+        <button
+          onClick={async () => {
+            const upd = await deleteExercise(session._id, i);
+            onUpdate(upd);
+          }}
+          className="text-rose-400 hover:text-rose-300 text-xs"
+        >
+          ✕
+        </button>
+      </span>
+    </li>
+  ))}
+</ul>
+
       </div>
     </div>
   );
