@@ -1,76 +1,76 @@
 const express  = require("express");
 const Session  = require("../models/Session");
+const router   = express.Router();
 
-const router = express.Router();
-
-/* ──────────────────────────────────────────
-   GET  /api/sessions      (public read-only)
-   ──────────────────────────────────────────*/
+/* GET  /api/sessions
+   community (guest)     → ?scope=community
+   community (user)      → ?scope=community&userId=uid
+   my-workouts (user)    → ?scope=mine&userId=uid            */
 router.get("/", async (req, res) => {
+  const { userId, scope = "community" } = req.query;
+
+  const filter =
+    scope === "mine"
+      ? { userId }                      // only owner
+      : { isPublic: true };             // community (public only)
+
   try {
-    const { userId } = req.query;
-    const filter = userId
-        ? { $or: [ { userId }, { isPublic:true } ] }
-        : { isPublic:true }; 
     const sessions = await Session.find(filter).sort({ date: -1 });
     res.json(sessions);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
-/* ──────────────────────────────────────────
-   POST /api/sessions       (create new session)
-   Body: { name, date?, userId }   ← userId REQUIRED
-   ──────────────────────────────────────────*/
+
+/* POST  /api/sessions  (owner creates) */
 router.post("/", async (req, res) => {
-  const { name, date, userId, userName, isPublic=true } = req.body;
+  const { name, date, userId, userName, isPublic } = req.body;
   if (!userId) return res.status(401).json({ error: "Missing userId" });
 
   try {
-    const session = await Session.create({ name, date, userId, exercises: [] });
-    res.status(201).json(session);
+    const s = await Session.create({
+      name,
+      date,
+      userId,
+      userName,
+      isPublic,
+      exercises: []
+    });
+    res.status(201).json(s);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-/* ──────────────────────────────────────────
-   DELETE /api/sessions/:id   (remove whole session)
-   ──────────────────────────────────────────*/
+/* DELETE entire session (owner only) */
 router.delete("/:id", async (req, res) => {
   await Session.findByIdAndDelete(req.params.id);
   res.status(204).end();
 });
 
-/* ──────────────────────────────────────────
-   POST /api/sessions/:id/exercise     (add exercise)
-   Body: { title, sets, reps, weight }
-   ──────────────────────────────────────────*/
+/* POST add exercise */
 router.post("/:id/exercise", async (req, res) => {
   try {
-    const session = await Session.findByIdAndUpdate(
+    const s = await Session.findByIdAndUpdate(
       req.params.id,
       { $push: { exercises: req.body } },
       { new: true }
     );
-    res.json(session);
+    res.json(s);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
 
-/* ──────────────────────────────────────────
-   DELETE /api/sessions/:id/exercise/:idx   (remove one exercise by index)
-   ──────────────────────────────────────────*/
+/* DELETE exercise by index */
 router.delete("/:id/exercise/:idx", async (req, res) => {
   const { id, idx } = req.params;
   try {
-    const session = await Session.findById(id);
-    if (!session) return res.status(404).end();
-
-    session.exercises.splice(Number(idx), 1);
-    await session.save();
-    res.json(session);
+    const s = await Session.findById(id);
+    if (!s) return res.status(404).end();
+    s.exercises.splice(Number(idx), 1);
+    await s.save();
+    res.json(s);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

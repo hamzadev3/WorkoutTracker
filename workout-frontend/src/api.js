@@ -2,10 +2,18 @@ import { auth } from "./firebase";
 
 const BASE = "http://localhost:5000/api";
 
-/* -------- SESSIONS --------------------------------------- */
-export async function getSessions(uid) {
-  const url = uid ? `${BASE}/sessions?userId=${uid}` : `${BASE}/sessions`;
-  const r   = await fetch(url);
+/* ---------- sessions ---------- */
+export async function getCommunity(uid) {
+  const url = uid
+    ? `${BASE}/sessions?scope=community&userId=${uid}`
+    : `${BASE}/sessions?scope=community`;
+  const r = await fetch(url);
+  return r.json();
+}
+
+export async function getMine(uid) {
+  if (!uid) throw new Error("Need uid for mine scope");
+  const r = await fetch(`${BASE}/sessions?scope=mine&userId=${uid}`);
   return r.json();
 }
 
@@ -29,25 +37,20 @@ export async function createSession({ name, date, isPublic }) {
 }
 
 export async function deleteSession(id) {
-  if (!auth.currentUser) throw new Error("Not signed in");
   await fetch(`${BASE}/sessions/${id}`, { method: "DELETE" });
 }
 
-/* -------- EXERCISES -------------------------------------- */
+/* ---------- exercises ---------- */
 export async function addExercise(sessionId, data) {
-  if (!auth.currentUser) throw new Error("Not signed in");
-
   const r = await fetch(`${BASE}/sessions/${sessionId}/exercise`, {
-    method:  "POST",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(data)
+    body:   JSON.stringify(data)
   });
   return r.json();
 }
 
 export async function deleteExercise(sessionId, idx) {
-  if (!auth.currentUser) throw new Error("Not signed in");
-
   const r = await fetch(`${BASE}/sessions/${sessionId}/exercise/${idx}`, {
     method: "DELETE"
   });
