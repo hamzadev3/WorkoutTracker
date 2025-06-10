@@ -15,6 +15,9 @@ const exerciseSchema = new mongoose.Schema(
 const sessionSchema = new mongoose.Schema({
   name:      { type: String, required: true },      // “Push Day”
   date:      { type: Date,   default: Date.now },
+  userId: String,
+  userName:String, 
+  isPublic:{ type:Boolean, default:true },
   exercises: [exerciseSchema]
 });
 

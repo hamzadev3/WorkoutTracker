@@ -9,7 +9,9 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const { userId } = req.query;
-    const filter = userId ? { userId } : { userId: { $exists: false } };
+    const filter = userId
+        ? { $or: [ { userId }, { isPublic:true } ] }
+        : { isPublic:true }; 
     const sessions = await Session.find(filter).sort({ date: -1 });
     res.json(sessions);
   } catch (e) {
@@ -21,7 +23,7 @@ router.get("/", async (req, res) => {
    Body: { name, date?, userId }   ← userId REQUIRED
    ──────────────────────────────────────────*/
 router.post("/", async (req, res) => {
-  const { name, date, userId } = req.body;
+  const { name, date, userId, userName, isPublic=true } = req.body;
   if (!userId) return res.status(401).json({ error: "Missing userId" });
 
   try {
