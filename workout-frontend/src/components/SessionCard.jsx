@@ -6,16 +6,15 @@ export default function SessionCard({ session, onOpen, onDelete }) {
       <div>
         <h3 className="text-lg font-semibold">{session.name}</h3>
 
-        {session.userName && (
-          <p className="text-xs text-slate-400 mb-1">by {session.userName}</p>
-        )}
+        <p className="text-xs text-slate-400 mb-1">
+          by {session.userName || "Anonymous"}
+        </p>
 
         <p className="text-xs text-slate-400">
           {new Date(session.date).toLocaleDateString(undefined, {
             weekday:"short", month:"short", day:"numeric", year:"numeric"
           })}
         </p>
-
         <p className="text-xs mt-1">{session.exercises.length} exercise(s)</p>
       </div>
 

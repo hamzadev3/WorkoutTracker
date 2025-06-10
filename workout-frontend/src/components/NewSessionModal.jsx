@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { createSession } from "../api";
+import toast from "react-hot-toast";
 
 export default function NewSessionModal({ onCreate, onClose }) {
   const [name, setName]   = useState("");
   const [date, setDate]   = useState("");
   const [isPublic, setPub] = useState(true);
+  const [displayName, setDN] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
-    const s = await createSession({ name, date, isPublic });
-    onCreate(s);
-    onClose();
+    if (!name.trim()) return toast.error("Session name required");
+    try {
+      const s = await createSession({ name, date, isPublic, displayName });
+      onCreate(s);
+      toast.success("Session created");
+      onClose();
+    } catch {
+      toast.error("Error creating session");
+    }
   };
 
   return (
@@ -34,7 +42,14 @@ export default function NewSessionModal({ onCreate, onClose }) {
           Show in Community tab
         </label>
 
-        <div className="flex gap-3">
+        {isPublic && (
+          <input value={displayName}
+                 onChange={(e)=>setDN(e.target.value)}
+                 placeholder="Display name (optional)"
+                 className="w-full p-2 rounded bg-slate-700 text-sm" />
+        )}
+
+        <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose}
                   className="flex-1 border rounded p-2">Cancel</button>
           <button type="submit"

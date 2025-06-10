@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { addExercise, deleteExercise } from "../api";
 import { useAuth } from "../AuthContext";
+import toast from "react-hot-toast";
 
 export default function SessionPage({ session, onUpdate, onClose }) {
   const { user } = useAuth();
@@ -13,9 +14,15 @@ export default function SessionPage({ session, onUpdate, onClose }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    const upd = await addExercise(session._id, { title, sets, reps, weight });
-    onUpdate(upd);
-    setTitle(""); setSets(""); setReps(""); setWt("");
+    if (!+sets || !+reps) return toast.error("Sets & reps must be > 0");
+    try {
+      const upd = await addExercise(session._id, { title, sets, reps, weight });
+      onUpdate(upd);
+      toast.success("Exercise added");
+      setTitle(""); setSets(""); setReps(""); setWt("");
+    } catch {
+      toast.error("Error adding exercise");
+    }
   };
 
   return (
@@ -31,13 +38,13 @@ export default function SessionPage({ session, onUpdate, onClose }) {
                    placeholder="Exercise" required />
             <input className="bg-slate-700 p-2 rounded" type="number"
                    value={sets}  onChange={(e)=>setSets(e.target.value)}
-                   placeholder="Sets" required />
+                   placeholder="Sets" required min="1" />
             <input className="bg-slate-700 p-2 rounded" type="number"
                    value={reps}  onChange={(e)=>setReps(e.target.value)}
-                   placeholder="Reps" required />
+                   placeholder="Reps" required min="1" />
             <input className="bg-slate-700 p-2 rounded" type="number"
                    value={weight} onChange={(e)=>setWt(e.target.value)}
-                   placeholder="Wt" required />
+                   placeholder="Wt" />
             <button className="col-span-2 sm:col-span-4 bg-indigo-600 rounded p-2 font-semibold">
               Add Exercise
             </button>
@@ -55,6 +62,7 @@ export default function SessionPage({ session, onUpdate, onClose }) {
                     onClick={async()=>{
                       const upd = await deleteExercise(session._id,i);
                       onUpdate(upd);
+                      toast.success("Deleted");
                     }}
                     className="text-rose-400 hover:text-rose-300 text-xs">✕</button>
                 )}
