@@ -6,25 +6,31 @@ import SessionPage from "./components/SessionPage";
 import AuthModal       from "./components/AuthModal";
 import { useAuth }     from "./AuthContext";
 
+const demoSessions = [
+  { _id:"demo1", name:"Demo Push Day", date:new Date(), exercises:[] },
+  { _id:"demo2", name:"Demo Pull Day", date:new Date(), exercises:[] },
+];
+
 export default function App() {
   const [sessions, setSessions] = useState([]);
   const [showNew,   setShowNew]   = useState(false);
   const [openSess,  setOpenSess]  = useState(null);
   const [showAuth,  setShowAuth]  = useState(false);
   const { user, logout } = useAuth();
+  useEffect(() => {
+  getSessions(user?.uid).then((data) => {
+    setSessions(data.length ? data : demoSessions);
+  });
+}, [user]);
 
-  useEffect(() => { getSessions().then(setSessions); }, []);
+  
+
 
   return (
     <div className="container mx-auto px-4 py-10">
       <header className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-extrabold tracking-tight">🏋️ Workout Tracker</h1>
-        <button
-          onClick={() => setShowNew(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold hover:bg-indigo-500"
-        >
-          New Session
-        </button>
+        
         <div className="space-x-3">
           <button
             onClick={() => user ? setShowNew(true) : setShowAuth(true)}

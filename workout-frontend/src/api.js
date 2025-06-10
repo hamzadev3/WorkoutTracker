@@ -3,9 +3,10 @@ import { auth } from "./firebase";
 
 const BASE = "http://localhost:5000/api";
 
-// -------- SESSIONS -----------------------
-export async function getSessions() {
-  const r = await fetch(`${BASE}/sessions`);
+/* GET all sessions, filtered by userId if provided */
+export async function getSessions(uid) {
+  const url = uid ? `${BASE}/sessions?userId=${uid}` : `${BASE}/sessions`;
+  const r   = await fetch(url);
   return r.json();
 }
 

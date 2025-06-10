@@ -6,15 +6,16 @@ const router = express.Router();
 /* ──────────────────────────────────────────
    GET  /api/sessions      (public read-only)
    ──────────────────────────────────────────*/
-router.get("/", async (_, res) => {
+router.get("/", async (req, res) => {
   try {
-    const sessions = await Session.find().sort({ date: -1 });
+    const { userId } = req.query;
+    const filter = userId ? { userId } : { userId: { $exists: false } };
+    const sessions = await Session.find(filter).sort({ date: -1 });
     res.json(sessions);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
-
 /* ──────────────────────────────────────────
    POST /api/sessions       (create new session)
    Body: { name, date?, userId }   ← userId REQUIRED
