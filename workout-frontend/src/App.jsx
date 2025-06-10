@@ -3,11 +3,15 @@ import { getSessions, deleteSession } from "./api";
 import SessionCard from "./components/SessionCard";
 import NewSessionModal from "./components/NewSessionModal";
 import SessionPage from "./components/SessionPage";
+import AuthModal       from "./components/AuthModal";
+import { useAuth }     from "./AuthContext";
 
 export default function App() {
   const [sessions, setSessions] = useState([]);
   const [showNew,   setShowNew]   = useState(false);
   const [openSess,  setOpenSess]  = useState(null);
+  const [showAuth,  setShowAuth]  = useState(false);
+  const { user, logout } = useAuth();
 
   useEffect(() => { getSessions().then(setSessions); }, []);
 
@@ -21,6 +25,22 @@ export default function App() {
         >
           New Session
         </button>
+        <div className="space-x-3">
+          <button
+            onClick={() => user ? setShowNew(true) : setShowAuth(true)}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold hover:bg-indigo-500"          >
+            New Session
+          </button>
+          {user ? (
+            <button onClick={logout} className="text-sm underline">
+              Sign out
+            </button>
+          ) : (
+            <button onClick={()=>setShowAuth(true)} className="text-sm underline">
+              Sign in
+            </button>
+                    )}
+        </div>
       </header>
 
       <div className="space-y-4">
@@ -54,9 +74,11 @@ export default function App() {
             setSessions(sessions.map(s => (s._id === upd._id ? upd : s)));
             setOpenSess(upd);
           }}
+          
           onClose={() => setOpenSess(null)}
         />
       )}
+      {showAuth && <AuthModal onClose={()=>setShowAuth(false)} />}
     </div>
   );
 }
