@@ -36,25 +36,34 @@ const workoutRoutes = require('./routes/workouts');
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/workouts', workoutRoutes);
 
-// ---- MongoDB connect ----
-const uri = process.env.MONGODB_URI || process.env.MONGO_URI;  // support either name
-if (!uri) {
-  console.warn('No Mongo URI found (MONGODB_URI / MONGO_URI). Routes that touch DB will fail.');
-} else {
-  mongoose
-    .connect(uri)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connect error:', err));
-}
-
-// ---- Start server only when file is run directly ----
-if (require.main === module) {
-  const PORT = process.env.PORT || 8080;
-  app.listen(PORT, () => {
-    console.log(`API running on http://localhost:${PORT}`);
-    console.log(`Swagger docs: http://localhost:${PORT}/docs`);
-  });
-}
-
-// Export app for tests
 module.exports = app;
+
+// 👉 Only connect to Mongo + start server when this file is run directly
+if (require.main === module) {
+  // Skip DB connection in tests
+  const isTest = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID;
+
+  const start = async () => {
+    const port = process.env.PORT || 8080;
+
+    if (!isTest) {
+      if (!process.env.MONGO_URI) {
+        console.error('Missing MONGO_URI. Set it in .env');
+        process.exit(1);
+      }
+      try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('MongoDB connected');
+      } catch (err) {
+        console.error('MongoDB connect error:', err);
+        process.exit(1);
+      }
+    }
+
+    app.listen(port, () =>
+      console.log(`API running on http://localhost:${port}${isTest ? ' [test mode]' : ''}`)
+    );
+  };
+
+  start();
+}
