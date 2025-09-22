@@ -1,3 +1,5 @@
+![CI](https://github.com/hamzadev3/WorkoutTracker/actions/workflows/ci.yml/badge.svg)
+
 # 🏋️ Workout Tracker
 
 A simple full-stack workout tracker built with:
@@ -15,7 +17,9 @@ A simple full-stack workout tracker built with:
 ## Getting Started
 
 ### Backend:
+
 ```bash
 cd workout-backend
 npm install
 node server.js
+```
